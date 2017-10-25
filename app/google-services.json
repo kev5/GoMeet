@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "917168625612",
+    "firebase_url": "https://meetgo-b05a4.firebaseio.com",
+    "project_id": "meetgo-b05a4",
+    "storage_bucket": "meetgo-b05a4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:917168625612:android:1764c16dda25f63f",
+        "android_client_info": {
+          "package_name": "com.example.meetgo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "917168625612-5db62778f2gq2d1t5qmtjgkm1it11fvs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.meetgo",
+            "certificate_hash": "6c1eee8e65cfb5ac6eae1bb6d3130122beede3a9"
+          }
+        },
+        {
+          "client_id": "917168625612-s44fv34v01f2i1nrtb45j1lrvhbm9r8c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCtWFL_zX0TbdnoB8H39sVq-bMdGLp2Dhs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "917168625612-s44fv34v01f2i1nrtb45j1lrvhbm9r8c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
