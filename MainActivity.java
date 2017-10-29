@@ -21,40 +21,128 @@ import com.lorentzos.flingswipe.SwipeFlingAdapterView;
 
 import java.util.ArrayList;
 
+import static android.content.ContentValues.TAG;
+
 public class MainActivity extends AppCompatActivity {
 
     public writeToFireBase mWrite = new writeToFireBase();
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-    Post post01 = new Post("this is the first post!\n",user.getUid());
+    private ArrayList<Post> postsToWrite;
+    Post post01 = new Post("this is the very first post!\n",user.getUid());
     Post post02 = new Post("this is the second post!\n",user.getUid());
     Post post03 = new Post("this is the third post!\n",user.getUid());
     Post post04 = new Post("this is the fourth post!\n",user.getUid());
     Post post05 = new Post("this is the fifth post!\n",user.getUid());
     Post post06 = new Post("this is the sixth post!\n",user.getUid());
-//    User user01 = new User("FeiChen");
     private ArrayList<String> al;
+    private ArrayList<Post> postArray;
     private ArrayAdapter<String> arrayAdapter;
     private int i;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mWrite.writePosts("01",post01);
-        mWrite.writePosts("02",post02);
-        mWrite.writePosts("03",post03);
-        mWrite.writePosts("04",post04);
-        mWrite.writePosts("05",post05);
-        mWrite.writePosts("06",post06);
+        mWrite.writePosts("1",post01);
+        mWrite.writePosts("2",post02);
+        mWrite.writePosts("3",post03);
+        mWrite.writePosts("4",post04);
+        mWrite.writePosts("5",post05);
+        mWrite.writePosts("6",post06);
         al = new ArrayList<>();
         al.add(post01.getPostText());
-        al.add(post02.getPostText());
-        al.add(post03.getPostText());
-        al.add(post04.getPostText());
-        al.add(post05.getPostText());
-        al.add(post06.getPostText());
+//        al.add(post02.getPostText());
+//        al.add(post03.getPostText());
+//        al.add(post04.getPostText());
+//        al.add(post05.getPostText());
+//        al.add(post06.getPostText());
 
+        ValueEventListener postListener01;
+        DatabaseReference ref01 = FirebaseDatabase.getInstance().getReference("posts").child("01").child("postText");
+        postListener01 = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // Get Post text
+                String str = dataSnapshot.getValue(String.class);
+                al.add(str);
+                // ...
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Getting Post failed, log a message
+                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                // ...
+            }
+        };
+        ref01.addValueEventListener(postListener01);
+
+        ValueEventListener postListener02;
+        DatabaseReference ref02 = FirebaseDatabase.getInstance().getReference("posts").child("02").child("postText");
+        postListener02 = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // Get Post text
+                String str = dataSnapshot.getValue(String.class);
+                al.add(str);
+                // ...
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Getting Post failed, log a message
+                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                // ...
+            }
+        };
+        ref02.addValueEventListener(postListener02);
+//
+//        ArrayList<ValueEventListener> postListenerList;
+//        postListenerList = new ArrayList<ValueEventListener>();
+//        ArrayList<DatabaseReference> refList;
+//        refList = new ArrayList<DatabaseReference>();
+//        for (int j=0;j<6;j++){
+//            refList.set(j,(FirebaseDatabase.getInstance().getReference("posts").child("0"+j).child("postText")));
+//            postListenerList.set(j, new ValueEventListener() {
+//                @Override
+//                public void onDataChange(DataSnapshot dataSnapshot) {
+//                    // Get Post text
+//                    String str = dataSnapshot.getValue(String.class);
+//                    al.add(str);
+//                    // ...
+//                }
+//                @Override
+//                public void onCancelled(DatabaseError databaseError) {
+//                    // Getting Post failed, log a message
+//                    Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+//                    // ...
+//                }
+//            });
+//
+//            refList.get(j).addValueEventListener(postListenerList.get(j));
+//        }
+
+
+//        readFromFireBase mRead = new readFromFireBase("1");
+//        al.add(mRead.readPostText());
+//        readFromFireBase mRead;
+//        for(int j=0; j<6; j++){
+//            DatabaseReference ref = FirebaseDatabase.getInstance().getReference("posts").child(""+j);
+//            postListener = new ValueEventListener() {
+//                @Override
+//                public void onDataChange(DataSnapshot dataSnapshot) {
+//                    // Get Post Text
+//                String str = dataSnapshot.getValue(String.class);
+//                al.add(str);
+//                    // ...
+//                }
+//                @Override
+//                public void onCancelled(DatabaseError databaseError) {
+//                    // Getting Post failed, log a message
+//                    Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+//                    // ...
+//                }
+//            };
+//            ref.addValueEventListener(postListener);
+//        }
         arrayAdapter = new ArrayAdapter<>(this, R.layout.item, R.id.helloText, al );
 
         SwipeFlingAdapterView flingContainer = (SwipeFlingAdapterView) findViewById(R.id.frame);
@@ -68,10 +156,6 @@ public class MainActivity extends AppCompatActivity {
                 al.remove(0);
                 arrayAdapter.notifyDataSetChanged();
             }
-//            Database data;
-//            FirebaseDatabase database = FirebaseDatabase.getInstance();
-//            DatabaseReference myRef = database.getReference("users");
-//            myRef.child("users").child(userId).setValue(user);
 
             @Override
             public void onLeftCardExit(Object dataObject) {
@@ -80,13 +164,6 @@ public class MainActivity extends AppCompatActivity {
                 //If you want to use it just cast it (String) dataObject
                 Toast.makeText(MainActivity.this, "Nope" , Toast.LENGTH_SHORT).show();
                 mWrite.dislikePost("01");
-//                userRef.child("cf0906").push();
-//                mWrite.loginUser();
-//                postRef.child(user01.getName()).child("attitude").child("Dislike").setValue(2);
-//                userRef.child(user.getUid()).setValue("on");
-
-//                data.getRef();
-//                data.addSelfToCommunity("690", "liuzulin");
             }
 
             @Override
