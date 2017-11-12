@@ -16,6 +16,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -93,7 +94,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             startActivity(new Intent(getApplicationContext(),ProfileActivity.class));
                         }
                         else{
-                            Toast.makeText(MainActivity.this,"Could not register. Please try again.",Toast.LENGTH_SHORT).show();
+                            FirebaseAuthException e = (FirebaseAuthException)task.getException();
+                            Toast.makeText(MainActivity.this, "Failed Registration: "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(MainActivity.this,"Could not register. Please try again.",Toast.LENGTH_SHORT).show();
                         }
                         progressDialog.hide();
                     }

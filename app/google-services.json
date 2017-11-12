@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "890591379490",
+    "firebase_url": "https://authapp-b9194.firebaseio.com",
+    "project_id": "authapp-b9194",
+    "storage_bucket": "authapp-b9194.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:890591379490:android:44ab206918ac6f2d",
+        "android_client_info": {
+          "package_name": "com.example.keval.gomeet"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "890591379490-dn1su91857a1qdpnbsq7n4u3u1osts98.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.keval.gomeet",
+            "certificate_hash": "4fed6cad425a9df82d2b7cd7731105cf1557a7d1"
+          }
+        },
+        {
+          "client_id": "890591379490-kf38eoct2sq8ksglhdihuad2esq3ukji.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBDHdf5RIiGdHfPmj42bZc0G_YBsdj_pG4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "890591379490-kf38eoct2sq8ksglhdihuad2esq3ukji.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
