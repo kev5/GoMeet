@@ -6,8 +6,8 @@
 
 ## Team Members
 
-* Keval Khara
-* Fei Chen
+* Keval Khara ![(GitHub Profile)](https://github.com/kev5)
+* Fei Chen ![(GitHub Profile)](https://github.com/nantongchenfei) 
 * Zulin Liu
 * Sihan Wang
 
