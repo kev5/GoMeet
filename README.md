@@ -8,7 +8,7 @@
 
 * Keval Khara ![(GitHub Profile)](https://github.com/kev5)
 * Fei Chen ![(GitHub Profile)](https://github.com/nantongchenfei) 
-* Zulin Liu
-* Sihan Wang
+* Zulin Liu ![(GitHub Profile)](https://github.com/liuzulin)
+* Sihan Wang ![(GitHub Profile)](https://github.com/shwang95)
 
 Trello link: https://trello.com/b/PedpOsv9/ec601opendata
