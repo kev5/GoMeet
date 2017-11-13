@@ -157,7 +157,7 @@ The developers considered the security of the software, **Authentication is addd
 The project is still under development :construction:, therefore, **Performance** of the project is not reviewed.
 
 #### 4.7 Scalability
-The **firebase realtime database** is utilized as the backend of the porject [writeToFireBase.java](https://github.com/kev5/Go-Meet/blob/master/writeToFireBase.java).  **The firebase realtime database** supports a large user base/data. Therefore, the scalability of the project is good.
+The **firebase realtime database** is utilized as the backend of the porject, which can be found in [writeToFireBase.java](https://github.com/kev5/Go-Meet/blob/master/writeToFireBase.java).  **The firebase realtime database** supports a large user base/data. Therefore, the scalability of the project is good.
 ```
     public writeToFireBase(){
         this.user = FirebaseAuth.getInstance().getCurrentUser();
@@ -175,15 +175,44 @@ The project is still under development :construction:, therefore, **Usability** 
 ### 5. Object-Oriented Analysis and Design (OOAD) Principles
 
 #### 5.1 Single Responsibility Principle(SRS)
+The classes in the code are checked, each single class or function has one responsibility. Therefore, **the code obeys the Single Responsibility Principle (SRS)**. Nice design! :clap:
+
 #### 5.2 Open Closed Principle
-#### 5.3 Liskov substitutability principle
+Owing to the developers' good design, each single class or function has one responsibility. While adding new functionality, existing code does not need to be modified. Therefore, the project obeys the **Open Closed Principle**.
+
+#### 5.3 Liskov substitutability principle 
+The class hierarchy does not exist in the project. Therefore, the project does not violate the **[Liskov substitutability principle]**(https://en.wikipedia.org/wiki/Liskov_substitution_principle)
+
 #### 5.4 Interface segregation:
+The project is still under development :construction:, therefore, **Interface segregation** of the project is not reviewed.
+
 #### 5.5 Dependency Injection:
+The project utilizes **firebase** to achieve authentication. Dependency injection is not applicable to the project.
 
 ## Summary
-### Good Points:
-### Can be better:
+### Good Points: 
+:full_moon_with_face: The overall code quality is high, the design of the software is good. 
 
-**Finally, Good Luck for your project :D)**:exclamation:
+:new_moon_with_face: The project has **proper code formatiing**，using **‘camelCode’ nameing convention** makes name of variables be **meaningful**.
+
+:new_moon: The architecture of the project is nice.
+
+:waxing_crescent_moon: There are some **to-do comments** mention pending tasks, which is good.
+
+:first_quarter_moon: The **Readability** of the code is good. The developers considered the security of the software, **Authentication is addded by utilizing the firebase**.
+
+:waxing_gibbous_moon: The project obeys **Single Responsibility Principle(SRS)**, **Open Closed Principle** and **Liskov substitutability principle**. 
+
+### Can be better:
+:full_moon: **GitHub file structure and directory structure is not clearly understandable**. It seems that it is because the project is still under development :construction:.
+
+:waning_gibbous_moon:There are some **commented code blocks** in the project. The commented code blocks could keep in other branch rather than the master branch.
+
+:last_quarter_moon: The developers could add **some comments to help others understand the code**.
+
+:waning_crescent_moon: The java file :link: [MainActivity.java](https://github.com/kev5/Go-Meet/blob/master/MainActivity.java) contains **[magic number](https://en.wikipedia.org/wiki/Magic_number_(programming))**.
+
+
+:sun_with_face: **Finally, Good Luck for your project :D)**:exclamation:
 
 :trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface::trollface:
