@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "/Users/liuzulin/Desktop/opendata_ec601/android-play-location/BasicLocationSample/app/build/intermediates/res/merged/debug/anim-v21/design_bottom_sheet_slide_in.xml",
+        "source": "/Users/liuzulin/.android/build-cache/d3823a424dca6b0381d4ddfcf307da2b6fd60978/output/res/anim-v21/design_bottom_sheet_slide_in.xml"
+    },
+    {
+        "merged": "/Users/liuzulin/Desktop/opendata_ec601/android-play-location/BasicLocationSample/app/build/intermediates/res/merged/debug/anim-v21/design_bottom_sheet_slide_out.xml",
+        "source": "/Users/liuzulin/.android/build-cache/d3823a424dca6b0381d4ddfcf307da2b6fd60978/output/res/anim-v21/design_bottom_sheet_slide_out.xml"
+    }
+]
