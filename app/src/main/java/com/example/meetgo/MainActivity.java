@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
         al.add("Sihan");
         al.add("Haircut");
 
+
         arrayAdapter = new ArrayAdapter<>(this, R.layout.item, R.id.helloText, al );
 
         SwipeFlingAdapterView flingContainer = (SwipeFlingAdapterView) findViewById(R.id.frame);
