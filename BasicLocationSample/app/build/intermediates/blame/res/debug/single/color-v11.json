@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "/Users/liuzulin/Desktop/opendata_ec601/android-play-location/BasicLocationSample/app/build/intermediates/res/merged/debug/color-v11/abc_background_cache_hint_selector_material_dark.xml",
+        "source": "/Users/liuzulin/.android/build-cache/a07d5217835f6e63dcbff31845ec4138c793b188/output/res/color-v11/abc_background_cache_hint_selector_material_dark.xml"
+    },
+    {
+        "merged": "/Users/liuzulin/Desktop/opendata_ec601/android-play-location/BasicLocationSample/app/build/intermediates/res/merged/debug/color-v11/abc_background_cache_hint_selector_material_light.xml",
+        "source": "/Users/liuzulin/.android/build-cache/a07d5217835f6e63dcbff31845ec4138c793b188/output/res/color-v11/abc_background_cache_hint_selector_material_light.xml"
+    }
+]
