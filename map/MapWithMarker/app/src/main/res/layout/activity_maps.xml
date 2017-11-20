@@ -25,6 +25,12 @@
         android:layout_weight="1.0"
         android:orientation="vertical" >
 
+        <Button
+            android:id="@+id/openMap"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="SHOW ME THE WAY!" />
+
         <EditText
             android:id="@+id/Name"
             android:layout_width="match_parent"

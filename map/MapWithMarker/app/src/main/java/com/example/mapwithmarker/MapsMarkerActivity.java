@@ -1,11 +1,14 @@
 package com.example.mapwithmarker;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextPaint;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -25,7 +28,10 @@ public class MapsMarkerActivity extends AppCompatActivity
     private String nameString;
     private String timeString;
     private String descriptionString;
+    private double lat;
+    private double lng;
     private LatLng location;
+    private Button mapAppCtrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +51,9 @@ public class MapsMarkerActivity extends AppCompatActivity
         nameString = (String) intename.getSerializableExtra("NAME");
         timeString = (String) intename.getSerializableExtra("TIME");
         descriptionString = (String) intename.getSerializableExtra("DES");
-        location = new LatLng((Double) intename.getSerializableExtra("LAT"),
-                (Double) intename.getSerializableExtra("LNG"));
+        lat = (double) intename.getSerializableExtra("LAT");
+        lng = (double) intename.getSerializableExtra("LNG");
+        location = new LatLng(lat, lng);
         // Get the SupportMapFragment and request notification
         // when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -56,6 +63,9 @@ public class MapsMarkerActivity extends AppCompatActivity
         name = (TextView) findViewById(R.id.Name);
         time = (TextView) findViewById(R.id.Time);
         description = (TextView) findViewById(R.id.Description);
+        // Get Button
+        mapAppCtrl = (Button) findViewById(R.id.openMap);
+        mapAppCtrl.setOnClickListener(new MapsMarkerActivity.ButtonClickHandler());
         // Set TextView uneditable
         name.setKeyListener(null);
         time.setKeyListener(null);
@@ -87,6 +97,22 @@ public class MapsMarkerActivity extends AppCompatActivity
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public class ButtonClickHandler implements View.OnClickListener {
+        public void onClick(View view) {
+            String uriPath = "https://www.google.com/maps/dir/";
+            String uriParams =
+                    "?api=1" +
+                            "&destination=" + String.valueOf(lat) + "," + String.valueOf(lng) +
+                            "&travelmode=walking";
+            Uri gmmIntentUri = Uri.parse(uriPath + uriParams);
+            Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+            mapIntent.setPackage("com.google.android.apps.maps");
+            if (mapIntent.resolveActivity(getPackageManager()) != null) {
+                startActivity(mapIntent);
+            }
+        }
     }
 
 }
