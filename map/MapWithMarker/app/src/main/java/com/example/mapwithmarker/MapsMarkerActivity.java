@@ -5,9 +5,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextPaint;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -32,6 +32,8 @@ public class MapsMarkerActivity extends AppCompatActivity
     private double lng;
     private LatLng location;
     private Button mapAppCtrl;
+    private String zipcodeString;
+    private String addressString;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +55,8 @@ public class MapsMarkerActivity extends AppCompatActivity
         descriptionString = (String) intename.getSerializableExtra("DES");
         lat = (double) intename.getSerializableExtra("LAT");
         lng = (double) intename.getSerializableExtra("LNG");
+        zipcodeString = (String) intename.getSerializableExtra("ZIPCODE");
+        addressString = (String) intename.getSerializableExtra("ADDRESS");
         location = new LatLng(lat, lng);
         // Get the SupportMapFragment and request notification
         // when the map is ready to be used.
@@ -78,7 +82,7 @@ public class MapsMarkerActivity extends AppCompatActivity
         //Set content
         name.setText(nameString);
         time.setText(timeString);
-        description.setText(descriptionString);
+        description.setText(String.format("%s\n%s\n%s", descriptionString, addressString, zipcodeString));
     }
 
     @Override

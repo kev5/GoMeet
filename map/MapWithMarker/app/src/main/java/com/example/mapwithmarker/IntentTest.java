@@ -14,12 +14,26 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Locale;
 
 public class IntentTest extends AppCompatActivity {
@@ -36,13 +50,16 @@ public class IntentTest extends AppCompatActivity {
      * Represents a geographical location.
      */
     protected Location mLastLocation;
+    private boolean mAddressRequested;
+    private ProgressBar mProgressBar;
 
     /** Called when the activity is first created. */
     EditText nameEditCtrl;
     EditText descriptionEditCtrl;
     EditText timeEditCtrl;
-    EditText latEditCtrl;
-    EditText lngEditCtrl;
+    EditText geoEditCtrl;
+    EditText zipEditCtrl;
+    EditText addEditCtrl;
     Button btnCtlr;
     Button locBtnCtlr;
     String name;
@@ -50,6 +67,8 @@ public class IntentTest extends AppCompatActivity {
     String time;
     Double lat;
     Double lng;
+    String zipcode;
+    String address;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,8 +78,13 @@ public class IntentTest extends AppCompatActivity {
         nameEditCtrl = (EditText) findViewById(R.id.editText1);
         descriptionEditCtrl = (EditText) findViewById(R.id.editText2);
         timeEditCtrl = (EditText) findViewById(R.id.editText3);
-        latEditCtrl = (EditText) findViewById(R.id.editText4);
-        lngEditCtrl = (EditText) findViewById(R.id.editText5);
+        geoEditCtrl = (EditText) findViewById(R.id.editText4);
+        zipEditCtrl = (EditText) findViewById(R.id.editText5);
+        addEditCtrl = (EditText) findViewById(R.id.editText6);
+
+        geoEditCtrl.setKeyListener(null);
+        zipEditCtrl.setKeyListener(null);
+        addEditCtrl.setKeyListener(null);
 
         btnCtlr = (Button) findViewById(R.id.button1);
         btnCtlr.setOnClickListener(new ButtonClickHandler());
@@ -68,6 +92,10 @@ public class IntentTest extends AppCompatActivity {
         locBtnCtlr.setOnClickListener(new LocationButtonHandler());
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
+
+        mAddressRequested = false;
+        updateUIWidgets();
     }
 
     /**
@@ -78,27 +106,20 @@ public class IntentTest extends AppCompatActivity {
             if (nameEditCtrl != null && nameEditCtrl.getText().length() != 0) {
                 name = nameEditCtrl.getText().toString();
             } else {
-                name = "Null";
+                showSnackbar("No event name");
+                return;
             }
             if (descriptionEditCtrl != null && descriptionEditCtrl.getText().length() != 0) {
                 description = descriptionEditCtrl.getText().toString();
             } else {
-                description = "Null";
+                showSnackbar("No event description");
+                return;
             }
             if (timeEditCtrl != null && timeEditCtrl.getText().length() != 0) {
                 time = timeEditCtrl.getText().toString();
             } else {
-                time = "Null";
-            }
-            if (latEditCtrl != null && latEditCtrl.getText().length() != 0) {
-                lat = Double.parseDouble(latEditCtrl.getText().toString());
-            } else {
-                time = "Null";
-            }
-            if (lngEditCtrl != null && lngEditCtrl.getText().length() != 0) {
-                lng = Double.parseDouble(lngEditCtrl.getText().toString());
-            } else {
-                time = "Null";
+                showSnackbar("No event time");
+                return;
             }
             Intent intObj = new Intent(IntentTest.this,
                     MapsMarkerActivity.class);
@@ -107,6 +128,8 @@ public class IntentTest extends AppCompatActivity {
             intObj.putExtra("TIME", time);
             intObj.putExtra("LAT", lat);
             intObj.putExtra("LNG", lng);
+            intObj.putExtra("ZIPCODE", zipcode);
+            intObj.putExtra("ADDRESS", address);
             startActivity(intObj);
         }
     }
@@ -135,9 +158,52 @@ public class IntentTest extends AppCompatActivity {
                     public void onComplete(@NonNull Task<Location> task) {
                         if (task.isSuccessful() && task.getResult() != null) {
                             mLastLocation = task.getResult();
+                            lat = mLastLocation.getLatitude();
+                            lng = mLastLocation.getLongitude();
+                            geoEditCtrl.setText(String.format(Locale.getDefault(), "%f, %f", lat, lng));
 
-                            latEditCtrl.setText(String.valueOf(mLastLocation.getLatitude()));
-                            lngEditCtrl.setText(String.valueOf(mLastLocation.getLongitude()));
+                            mAddressRequested = true;
+                            updateUIWidgets();
+                            final String geocodeUrl = String.format(Locale.getDefault(),
+                                    "https://maps.googleapis.com/maps/api/geocode/json?latlng=%f,%f&sensor=true&key=AIzaSyCMl39spGvXhB2VW1tjdyXMJOJLIkxkWv0",
+                                    lat, lng);
+                            Thread thread = new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    HttpGet httpGet = new HttpGet(geocodeUrl);
+                                    HttpClient client = new DefaultHttpClient();
+                                    HttpResponse response;
+                                    StringBuilder stringBuilder = new StringBuilder();
+
+                                    try
+                                    {
+                                        response = client.execute(httpGet);
+                                        HttpEntity entity = response.getEntity();
+                                        InputStream stream = entity.getContent();
+                                        int b;
+                                        while ((b = stream.read()) != -1) {
+                                            stringBuilder.append((char) b);
+                                        }
+                                    } catch (ClientProtocolException e) {
+                                    } catch (IOException e) {
+                                    }
+                                    JSONObject jsonObject = new JSONObject();
+                                    try {
+                                        jsonObject = new JSONObject(stringBuilder.toString());
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    getLoc(jsonObject);
+                                }
+                            });
+
+                            thread.start();
+                            try {
+                                thread.join();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            displayAddressOutput();
                         } else {
                             Log.w(TAG, "getLastLocation:exception", task.getException());
                             showSnackbar(getString(R.string.no_location_detected));
@@ -233,6 +299,54 @@ public class IntentTest extends AppCompatActivity {
                             }
                         });
             }
+        }
+    }
+
+    private void getLoc(JSONObject jsonObj) {
+        address = null;
+        zipcode = null;
+        try {
+            String status = jsonObj.getString("status");
+            if(status.equalsIgnoreCase("OK")){
+                JSONArray results = jsonObj.getJSONArray("results");
+                for(int i = 0; i < results.length(); i++) {
+                    JSONObject r = results.getJSONObject(i);
+                    JSONArray typesArray = r.getJSONArray("types");
+                    String types = typesArray.getString(0);
+                    if(types.equalsIgnoreCase("premise")) {
+                        address = r.getString("formatted_address").split(", ")[0];
+                        Log.i("Address", address);
+                    } else if(types.equalsIgnoreCase("postal_code")) {
+                        zipcode = r.getJSONArray("address_components").
+                                getJSONObject(0).getString("long_name");
+                        Log.i("Zipcode", zipcode);
+                    }
+                }
+            }
+        } catch (JSONException e) {
+            Log.e("Error", "Failed to load JSON");
+            e.printStackTrace();
+        }
+    }
+
+    private void displayAddressOutput() {
+        if(address == null || zipcode == null) {
+            showSnackbar("Invalid location.");
+        } else {
+            addEditCtrl.setText(address);
+            zipEditCtrl.setText(zipcode);
+        }
+        mAddressRequested = false;
+        updateUIWidgets();
+    }
+
+    private void updateUIWidgets() {
+        if (mAddressRequested) {
+            mProgressBar.setVisibility(ProgressBar.VISIBLE);
+            locBtnCtlr.setEnabled(false);
+        } else {
+            mProgressBar.setVisibility(ProgressBar.GONE);
+            locBtnCtlr.setEnabled(true);
         }
     }
 }
