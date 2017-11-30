@@ -1,12 +1,18 @@
 package com.example.meetgo;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
-
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -15,137 +21,33 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
 import com.lorentzos.flingswipe.SwipeFlingAdapterView;
 
 import java.util.ArrayList;
 
-import static android.content.ContentValues.TAG;
-
 public class MainActivity extends AppCompatActivity {
 
-    public writeToFireBase mWrite = new writeToFireBase();
-    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-    private ArrayList<Post> postsToWrite;
-    Post post01 = new Post("this is the very first post!\n",user.getUid());
-    Post post02 = new Post("this is the second post!\n",user.getUid());
-    Post post03 = new Post("this is the third post!\n",user.getUid());
-    Post post04 = new Post("this is the fourth post!\n",user.getUid());
-    Post post05 = new Post("this is the fifth post!\n",user.getUid());
-    Post post06 = new Post("this is the sixth post!\n",user.getUid());
     private ArrayList<String> al;
-    private ArrayList<Post> postArray;
     private ArrayAdapter<String> arrayAdapter;
     private int i;
+    private FirebaseAuth mAuth;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mWrite.writePosts("1",post01);
-        mWrite.writePosts("2",post02);
-        mWrite.writePosts("3",post03);
-        mWrite.writePosts("4",post04);
-        mWrite.writePosts("5",post05);
-        mWrite.writePosts("6",post06);
+        CheckUserSex();
+
+
+
         al = new ArrayList<>();
-        al.add(post01.getPostText());
-//        al.add(post02.getPostText());
-//        al.add(post03.getPostText());
-//        al.add(post04.getPostText());
-//        al.add(post05.getPostText());
-//        al.add(post06.getPostText());
-
-        ValueEventListener postListener01;
-        DatabaseReference ref01 = FirebaseDatabase.getInstance().getReference("posts").child("01").child("postText");
-        postListener01 = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // Get Post text
-                String str = dataSnapshot.getValue(String.class);
-                al.add(str);
-                // ...
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // Getting Post failed, log a message
-                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                // ...
-            }
-        };
-        ref01.addValueEventListener(postListener01);
-
-        ValueEventListener postListener02;
-        DatabaseReference ref02 = FirebaseDatabase.getInstance().getReference("posts").child("02").child("postText");
-        postListener02 = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // Get Post text
-                String str = dataSnapshot.getValue(String.class);
-                al.add(str);
-                // ...
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // Getting Post failed, log a message
-                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                // ...
-            }
-        };
-        ref02.addValueEventListener(postListener02);
-//
-//        ArrayList<ValueEventListener> postListenerList;
-//        postListenerList = new ArrayList<ValueEventListener>();
-//        ArrayList<DatabaseReference> refList;
-//        refList = new ArrayList<DatabaseReference>();
-//        for (int j=0;j<6;j++){
-//            refList.set(j,(FirebaseDatabase.getInstance().getReference("posts").child("0"+j).child("postText")));
-//            postListenerList.set(j, new ValueEventListener() {
-//                @Override
-//                public void onDataChange(DataSnapshot dataSnapshot) {
-//                    // Get Post text
-//                    String str = dataSnapshot.getValue(String.class);
-//                    al.add(str);
-//                    // ...
-//                }
-//                @Override
-//                public void onCancelled(DatabaseError databaseError) {
-//                    // Getting Post failed, log a message
-//                    Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-//                    // ...
-//                }
-//            });
-//
-//            refList.get(j).addValueEventListener(postListenerList.get(j));
-//        }
-
-
-//        readFromFireBase mRead = new readFromFireBase("1");
-//        al.add(mRead.readPostText());
-//        readFromFireBase mRead;
-//        for(int j=0; j<6; j++){
-//            DatabaseReference ref = FirebaseDatabase.getInstance().getReference("posts").child(""+j);
-//            postListener = new ValueEventListener() {
-//                @Override
-//                public void onDataChange(DataSnapshot dataSnapshot) {
-//                    // Get Post Text
-//                String str = dataSnapshot.getValue(String.class);
-//                al.add(str);
-//                    // ...
-//                }
-//                @Override
-//                public void onCancelled(DatabaseError databaseError) {
-//                    // Getting Post failed, log a message
-//                    Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-//                    // ...
-//                }
-//            };
-//            ref.addValueEventListener(postListener);
-//        }
         arrayAdapter = new ArrayAdapter<>(this, R.layout.item, R.id.helloText, al );
+        //getUserCard();
 
         SwipeFlingAdapterView flingContainer = (SwipeFlingAdapterView) findViewById(R.id.frame);
+
 
         flingContainer.setAdapter(arrayAdapter);
         flingContainer.setFlingListener(new SwipeFlingAdapterView.onFlingListener() {
@@ -162,23 +64,21 @@ public class MainActivity extends AppCompatActivity {
                 //Do something on the left!
                 //You also have access to the original object.
                 //If you want to use it just cast it (String) dataObject
-                Toast.makeText(MainActivity.this, "Nope" , Toast.LENGTH_SHORT).show();
-                mWrite.dislikePost("01");
+                Toast.makeText(MainActivity.this, "NOPE!", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onRightCardExit(Object dataObject) {
                 Toast.makeText(MainActivity.this, "Like!", Toast.LENGTH_SHORT).show();
-                mWrite.likePost("01");
             }
 
             @Override
             public void onAdapterAboutToEmpty(int itemsInAdapter) {
                 // Ask for more data here
-                al.add("XML ".concat(String.valueOf(i)));
-                arrayAdapter.notifyDataSetChanged();
-                Log.d("LIST", "notified");
-                i++;
+//                al.add("XML ".concat(String.valueOf(i)));
+//                arrayAdapter.notifyDataSetChanged();
+//                Log.d("LIST", "notified");
+//                i++;
             }
 
             @Override
@@ -195,5 +95,145 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+    private String userSex;
+    private String notUserSex;
+    public void CheckUserSex(){
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference maleDb = FirebaseDatabase.getInstance().getReference().child("Users").child("Male");
+        maleDb.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                if(dataSnapshot.getKey().equals(user.getUid())){
+                    userSex = "Male";
+                    notUserSex = "Female";
+                    getNotUserSex();
+                }
+            }
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            }
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+        DatabaseReference femaleDb = FirebaseDatabase.getInstance().getReference().child("Users").child("Female");
+        femaleDb.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                if(dataSnapshot.getKey().equals(user.getUid())){
+                    userSex = "Female";
+                    notUserSex = "Male";
+                    getNotUserSex();
+                }
+            }
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            }
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+    }
+    public void getNotUserSex(){
+        DatabaseReference notUserSexDb = FirebaseDatabase.getInstance().getReference().child("Users").child(notUserSex);
+        notUserSexDb.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                if(dataSnapshot.exists()){
+                    al.add(String.valueOf(dataSnapshot.child("Post").getValue()));
+                    arrayAdapter.notifyDataSetChanged();
+                }
+            }
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            }
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+
+    }
+//    public void getUserCard(){
+//        DatabaseReference UserCardDb = FirebaseDatabase.getInstance().getReference().child("Users").child("Male");
+//        UserCardDb.addChildEventListener(new ChildEventListener() {
+//            @Override
+//            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+//                if(dataSnapshot.exists()){
+//                    al.add(dataSnapshot.child("name").getValue().toString());
+//                    arrayAdapter.notifyDataSetChanged();
+//                }
+//            }
+//            @Override
+//            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+//            }
+//            @Override
+//            public void onChildRemoved(DataSnapshot dataSnapshot) {
+//            }
+//            @Override
+//            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+//            }
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//            }
+//        });
+//
+//    }
+
+    public void logoutUser(View view) {
+        mAuth.signOut();
+        Intent intent = new Intent(MainActivity.this,ChooseLoginRegistrationActivity.class);
+        startActivity(intent);
+        finish();
+        return;
+    }
+    private EditText mEventName;
+    private Button mPostEvent;
+//    public void postEvent(View view) {
+//        view = (LayoutInflater.from(MainActivity.this)).inflate(R.layout.activity_post, null);
+//        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(MainActivity.this);
+//        alertBuilder.setView(view);
+//
+//        Dialog dialog = alertBuilder.create();
+//        dialog.show();
+//
+//        alertBuilder.setCancelable(true)
+//                .setPositiveButton("GO", new DialogInterface.OnClickListener(){
+//                    //private EditText mEventName;
+//
+//                    @Override
+//                    public void onClick(DialogInterface dialog,int which){
+//                        mEventName = (EditText) findViewById(R.id.event_name);
+//                        final String eventName = mEventName.getText().toString();
+//                        final String userId = mAuth.getCurrentUser().getUid();
+//                        DatabaseReference postDb = FirebaseDatabase.getInstance().getReference().child("Users").child(userSex).child(userId).child("dd");
+//                        postDb.setValue(eventName);
+//
+//                    }
+//                });
+//    }
+    public void postEvent(View view){
+        Intent intent = new Intent(MainActivity.this,PostActivity.class);
+        startActivity(intent);
+        finish();
+        return;
     }
 }
