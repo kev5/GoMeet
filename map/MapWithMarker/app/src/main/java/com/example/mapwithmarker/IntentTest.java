@@ -1,5 +1,6 @@
 package com.example.mapwithmarker;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +21,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -28,6 +30,14 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.seatgeek.placesautocomplete.DetailsCallback;
+import com.seatgeek.placesautocomplete.OnPlaceSelectedListener;
+import com.seatgeek.placesautocomplete.PlacesAutocompleteTextView;
+import com.seatgeek.placesautocomplete.model.AddressComponent;
+import com.seatgeek.placesautocomplete.model.AddressComponentType;
+import com.seatgeek.placesautocomplete.model.Place;
+import com.seatgeek.placesautocomplete.model.PlaceDetails;
+import com.seatgeek.placesautocomplete.model.PlaceGeometry;
 
 public class IntentTest extends AppCompatActivity {
     private static final String TAG = IntentTest.class.getSimpleName();
@@ -43,18 +53,11 @@ public class IntentTest extends AppCompatActivity {
     private AddressResultReceiver mResultReceiver;
 
     /** Called when the activity is first created. */
-    EditText nameEditCtrl;
-    EditText descriptionEditCtrl;
-    EditText timeEditCtrl;
-    EditText zipEditCtrl;
-    EditText addEditCtrl;
-    Button btnCtlr;
-    Button locBtnCtlr;
-    String name;
-    String description;
-    String time;
-    Double lat;
-    Double lng;
+    EditText nameEditCtrl, descriptionEditCtrl, timeEditCtrl, zipEditCtrl;
+    PlacesAutocompleteTextView addEditCtrl;
+    Button btnCtlr, locBtnCtlr;
+    String name, description, time;
+    Double lat, lng, lat_final, lng_final;
     String zipcode = null;
     String address = null;
 
@@ -67,10 +70,9 @@ public class IntentTest extends AppCompatActivity {
         descriptionEditCtrl = (EditText) findViewById(R.id.editText2);
         timeEditCtrl = (EditText) findViewById(R.id.editText3);
         zipEditCtrl = (EditText) findViewById(R.id.editText5);
-        addEditCtrl = (EditText) findViewById(R.id.editText6);
+        addEditCtrl = (PlacesAutocompleteTextView) findViewById(R.id.editText6);
 
         zipEditCtrl.setKeyListener(null);
-        addEditCtrl.setKeyListener(null);
 
         btnCtlr = (Button) findViewById(R.id.button1);
         btnCtlr.setOnClickListener(new ButtonClickHandler());
@@ -94,6 +96,59 @@ public class IntentTest extends AppCompatActivity {
                     }
                 }, new IntentFilter(LocationMonitoringService.ACTION_LOCATION_BROADCAST)
         );
+
+        addEditCtrl.setOnPlaceSelectedListener(new OnPlaceSelectedListener() {
+            @Override
+            public void onPlaceSelected(final Place place) {
+                addEditCtrl.getDetailsFor(place, new DetailsCallback() {
+                    @Override
+                    public void onSuccess(final PlaceDetails details) {
+                        Log.d("test", "details " + details);
+
+                        hideKeyboard(IntentTest.this);
+
+                        for (AddressComponent component : details.address_components) {
+                            for (AddressComponentType type : component.types) {
+                                switch (type) {
+                                    case STREET_NUMBER:
+                                        break;
+                                    case ROUTE:
+                                        break;
+                                    case NEIGHBORHOOD:
+                                        break;
+                                    case SUBLOCALITY_LEVEL_1:
+                                        break;
+                                    case SUBLOCALITY:
+                                        break;
+                                    case LOCALITY:
+                                        break;
+                                    case ADMINISTRATIVE_AREA_LEVEL_1:
+                                        break;
+                                    case ADMINISTRATIVE_AREA_LEVEL_2:
+                                        break;
+                                    case COUNTRY:
+                                        break;
+                                    case POSTAL_CODE:
+                                        zipcode = component.long_name;
+                                        break;
+                                    case POLITICAL:
+                                        break;
+                                }
+                            }
+                        }
+                        address = details.formatted_address;
+                        lat_final = details.geometry.location.lat;
+                        lng_final = details.geometry.location.lng;
+                        displayAddressOutput();
+                    }
+
+                    @Override
+                    public void onFailure(final Throwable failure) {
+                        Log.d("test", "failure " + failure);
+                    }
+                });
+            }
+        });
     }
 
     @Override
@@ -159,13 +214,14 @@ public class IntentTest extends AppCompatActivity {
                 showSnackbar("No event time");
                 return;
             }
+            Log.d(TAG, String.format("%f, %f", lat_final, lng_final));
             Intent intObj = new Intent(IntentTest.this,
                     MapsMarkerActivity.class);
             intObj.putExtra("NAME", name);
             intObj.putExtra("DES", description);
             intObj.putExtra("TIME", time);
-            intObj.putExtra("LAT", lat);
-            intObj.putExtra("LNG", lng);
+            intObj.putExtra("LAT", lat_final);
+            intObj.putExtra("LNG", lng_final);
             intObj.putExtra("ZIPCODE", zipcode);
             intObj.putExtra("ADDRESS", address);
             startActivity(intObj);
@@ -178,8 +234,11 @@ public class IntentTest extends AppCompatActivity {
     public class LocationButtonHandler implements View.OnClickListener {
         public void onClick(View view) {
             stopService(new Intent(IntentTest.this, LocationMonitoringService.class));
+
             if (lat != null && lng != null) {
                 Log.i(TAG, String.format("%f, %f", lat, lng));
+                lat_final = lat;
+                lng_final = lng;
                 mLastLocation.setLatitude(lat);
                 mLastLocation.setLongitude(lng);
                 startIntentService();
@@ -188,6 +247,7 @@ public class IntentTest extends AppCompatActivity {
             } else {
                 showToast("No location");
             }
+
             checkInternet();
         }
     }
@@ -327,6 +387,15 @@ public class IntentTest extends AppCompatActivity {
             mAddressRequested = false;
             updateUIWidgets();
         }
+    }
+
+    public static void hideKeyboard(Activity activity) {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        View view = activity.getCurrentFocus();
+        if (view == null) {
+            view = new View(activity);
+        }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     public void onDestroy() {

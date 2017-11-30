@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion '26.0.2'
+    compileSdkVersion 27
+    buildToolsVersion '27.0.1'
     useLibrary 'org.apache.http.legacy'
     defaultConfig {
         applicationId "com.example.mapwithmarker"
         minSdkVersion 15
-        targetSdkVersion 24
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -26,8 +26,10 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:24.2.1'
-    compile 'com.google.android.gms:play-services:11.2.0'
-    compile 'com.android.support:design:24.2.1'
+    compile 'com.android.support:appcompat-v7:27.0.1'
+    compile 'com.google.android.gms:play-services:11.6.2'
+    compile 'com.android.support:design:27.0.1'
+    compile 'com.seatgeek:placesautocomplete:0.3-SNAPSHOT'
+    compile 'com.google.code.gson:gson:2.8.0'
     testCompile 'junit:junit:4.12'
 }

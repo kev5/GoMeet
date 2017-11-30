@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main_activity_container"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -43,11 +44,11 @@
             android:text="Address"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
-        <EditText
+        <com.seatgeek.placesautocomplete.PlacesAutocompleteTextView
             android:id="@+id/editText6"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="10" />
+            app:pacv_googleMapsApiKey="@string/google_maps_key"/>
 
         <TextView
             android:id="@+id/textView3"

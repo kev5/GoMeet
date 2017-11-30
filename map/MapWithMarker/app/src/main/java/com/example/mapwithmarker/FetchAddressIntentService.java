@@ -56,8 +56,8 @@ public class FetchAddressIntentService extends IntentService {
 
         Log.i(TAG, String.format("%f, %f", lat, lng));
         final String geocodeUrl = String.format(Locale.getDefault(),
-                "https://maps.googleapis.com/maps/api/geocode/json?latlng=%f,%f&result_type=street_address&key=AIzaSyCMl39spGvXhB2VW1tjdyXMJOJLIkxkWv0",
-                lat, lng);
+                "https://maps.googleapis.com/maps/api/geocode/json?latlng=%f,%f&result_type=street_address&key=%s",
+                lat, lng, getString(R.string.google_maps_key));
 
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -112,13 +112,7 @@ public class FetchAddressIntentService extends IntentService {
             if(status.equalsIgnoreCase("OK")){
                 JSONArray results = jsonObj.getJSONArray("results");
                 Log.i(TAG, results.toString());
-                String[] addressFragments = results.getJSONObject(0).getString("formatted_address").split(", ");
-                ArrayList<String> addresses = new ArrayList<>();
-                for (int i = 0; i < addressFragments.length - 1; i++) {
-                    addresses.add(addressFragments[i]);
-                }
-                addresses.remove(addresses.size()-1);
-                address = TextUtils.join(", ", addresses);
+                address = results.getJSONObject(0).getString("formatted_address");
                 JSONArray address_components = results.getJSONObject(0).getJSONArray("address_components");
                 for (int i = 0; i < address_components.length(); i++) {
                     JSONObject temp = address_components.getJSONObject(i);
