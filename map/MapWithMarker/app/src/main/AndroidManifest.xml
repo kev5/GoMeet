@@ -37,6 +37,12 @@
             android:label="@string/title_activity_maps">
         </activity>
 
+        <service
+            android:name=".FetchAddressIntentService"
+            android:exported="false"/>
+
+        <service android:name=".LocationMonitoringService" />
+
     </application>
 
 </manifest>

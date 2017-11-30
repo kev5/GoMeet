@@ -1,40 +1,33 @@
 package com.example.mapwithmarker;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.ResultReceiver;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Locale;
 
 public class IntentTest extends AppCompatActivity {
     private static final String TAG = IntentTest.class.getSimpleName();
@@ -42,22 +35,17 @@ public class IntentTest extends AppCompatActivity {
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
 
     /**
-     * Provides the entry point to the Fused Location Provider API.
-     */
-    private FusedLocationProviderClient mFusedLocationClient;
-
-    /**
      * Represents a geographical location.
      */
     protected Location mLastLocation;
     private boolean mAddressRequested;
     private ProgressBar mProgressBar;
+    private AddressResultReceiver mResultReceiver;
 
     /** Called when the activity is first created. */
     EditText nameEditCtrl;
     EditText descriptionEditCtrl;
     EditText timeEditCtrl;
-    EditText geoEditCtrl;
     EditText zipEditCtrl;
     EditText addEditCtrl;
     Button btnCtlr;
@@ -67,8 +55,8 @@ public class IntentTest extends AppCompatActivity {
     String time;
     Double lat;
     Double lng;
-    String zipcode;
-    String address;
+    String zipcode = null;
+    String address = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -78,11 +66,9 @@ public class IntentTest extends AppCompatActivity {
         nameEditCtrl = (EditText) findViewById(R.id.editText1);
         descriptionEditCtrl = (EditText) findViewById(R.id.editText2);
         timeEditCtrl = (EditText) findViewById(R.id.editText3);
-        geoEditCtrl = (EditText) findViewById(R.id.editText4);
         zipEditCtrl = (EditText) findViewById(R.id.editText5);
         addEditCtrl = (EditText) findViewById(R.id.editText6);
 
-        geoEditCtrl.setKeyListener(null);
         zipEditCtrl.setKeyListener(null);
         addEditCtrl.setKeyListener(null);
 
@@ -91,11 +77,63 @@ public class IntentTest extends AppCompatActivity {
         locBtnCtlr = (Button) findViewById(R.id.button2);
         locBtnCtlr.setOnClickListener(new LocationButtonHandler());
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        mLastLocation = new Location("");
         mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
+
+        mResultReceiver = new AddressResultReceiver(new Handler());
 
         mAddressRequested = false;
         updateUIWidgets();
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        lat = Double.parseDouble(intent.getStringExtra(LocationMonitoringService.EXTRA_LATITUDE));
+                        lng = Double.parseDouble(intent.getStringExtra(LocationMonitoringService.EXTRA_LONGITUDE));
+                    }
+                }, new IntentFilter(LocationMonitoringService.ACTION_LOCATION_BROADCAST)
+        );
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (checkGooglePlayServices()) {
+            checkInternet();
+        } else {
+            showToast("No google play service");
+        }
+    }
+
+    public boolean checkGooglePlayServices() {
+        GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
+        int status = googleApiAvailability.isGooglePlayServicesAvailable(this);
+        if (status != ConnectionResult.SUCCESS) {
+            if (googleApiAvailability.isUserResolvableError(status)) {
+                googleApiAvailability.getErrorDialog(this, status, 2404).show();
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private void checkInternet() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+
+        if (activeNetworkInfo == null || !activeNetworkInfo.isConnected()) {
+            showToast("No internet connection");
+            return;
+        }
+
+        if (checkPermissions()) {
+            Intent intent = new Intent(this, LocationMonitoringService.class);
+            startService(intent);
+        } else {
+            requestPermissions();
+        }
     }
 
     /**
@@ -139,77 +177,26 @@ public class IntentTest extends AppCompatActivity {
      */
     public class LocationButtonHandler implements View.OnClickListener {
         public void onClick(View view) {
-            if (!checkPermissions()) {
-                requestPermissions();
+            stopService(new Intent(IntentTest.this, LocationMonitoringService.class));
+            if (lat != null && lng != null) {
+                Log.i(TAG, String.format("%f, %f", lat, lng));
+                mLastLocation.setLatitude(lat);
+                mLastLocation.setLongitude(lng);
+                startIntentService();
+                mAddressRequested = true;
+                updateUIWidgets();
             } else {
-                getLastLocation();
+                showToast("No location");
             }
+            checkInternet();
         }
     }
 
-    /**
-     * Get location.
-     */
-    @SuppressWarnings("MissingPermission")
-    private void getLastLocation() {
-        mFusedLocationClient.getLastLocation()
-                .addOnCompleteListener(this, new OnCompleteListener<Location>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Location> task) {
-                        if (task.isSuccessful() && task.getResult() != null) {
-                            mLastLocation = task.getResult();
-                            lat = mLastLocation.getLatitude();
-                            lng = mLastLocation.getLongitude();
-                            geoEditCtrl.setText(String.format(Locale.getDefault(), "%f, %f", lat, lng));
-
-                            mAddressRequested = true;
-                            updateUIWidgets();
-                            final String geocodeUrl = String.format(Locale.getDefault(),
-                                    "https://maps.googleapis.com/maps/api/geocode/json?latlng=%f,%f&sensor=true&key=AIzaSyCMl39spGvXhB2VW1tjdyXMJOJLIkxkWv0",
-                                    lat, lng);
-                            Thread thread = new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    HttpGet httpGet = new HttpGet(geocodeUrl);
-                                    HttpClient client = new DefaultHttpClient();
-                                    HttpResponse response;
-                                    StringBuilder stringBuilder = new StringBuilder();
-
-                                    try
-                                    {
-                                        response = client.execute(httpGet);
-                                        HttpEntity entity = response.getEntity();
-                                        InputStream stream = entity.getContent();
-                                        int b;
-                                        while ((b = stream.read()) != -1) {
-                                            stringBuilder.append((char) b);
-                                        }
-                                    } catch (ClientProtocolException e) {
-                                    } catch (IOException e) {
-                                    }
-                                    JSONObject jsonObject = new JSONObject();
-                                    try {
-                                        jsonObject = new JSONObject(stringBuilder.toString());
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                    getLoc(jsonObject);
-                                }
-                            });
-
-                            thread.start();
-                            try {
-                                thread.join();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            displayAddressOutput();
-                        } else {
-                            Log.w(TAG, "getLastLocation:exception", task.getException());
-                            showSnackbar(getString(R.string.no_location_detected));
-                        }
-                    }
-                });
+    private void startIntentService() {
+        Intent intent = new Intent(this, FetchAddressIntentService.class);
+        intent.putExtra(Constants.RECEIVER, mResultReceiver);
+        intent.putExtra(Constants.LOCATION_DATA_EXTRA, mLastLocation);
+        startService(intent);
     }
 
     private void showSnackbar(final String text) {
@@ -227,9 +214,6 @@ public class IntentTest extends AppCompatActivity {
                 .setAction(getString(actionStringId), listener).show();
     }
 
-    /**
-     * Return the current state of the permissions needed.
-     */
     private boolean checkPermissions() {
         int permissionState = ActivityCompat.checkSelfPermission(this,
                 android.Manifest.permission.ACCESS_COARSE_LOCATION);
@@ -247,7 +231,6 @@ public class IntentTest extends AppCompatActivity {
                 ActivityCompat.shouldShowRequestPermissionRationale(this,
                         android.Manifest.permission.ACCESS_COARSE_LOCATION);
 
-        // Provide an additional rationale to the user.
         if (shouldProvideRationale) {
             Log.i(TAG, "Displaying permission rationale to provide additional context.");
 
@@ -255,39 +238,31 @@ public class IntentTest extends AppCompatActivity {
                     new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            // Request permission
                             startLocationPermissionRequest();
                         }
                     });
 
         } else {
             Log.i(TAG, "Requesting permission");
-            // Request permission. \
             startLocationPermissionRequest();
         }
     }
 
-    /**
-     * Callback received when a permissions request has been completed.
-     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         Log.i(TAG, "onRequestPermissionResult");
         if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
             if (grantResults.length <= 0) {
-                // If user interaction was interrupted.
                 Log.i(TAG, "User interaction was cancelled.");
             } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted.
-                getLastLocation();
+                Intent intent = new Intent(this, LocationMonitoringService.class);
+                startService(intent);
             } else {
-                // Permission denied.
                 showSnackbar(R.string.permission_denied_explanation, R.string.settings,
                         new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                // Build intent that displays the App settings screen.
                                 Intent intent = new Intent();
                                 intent.setAction(
                                         Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
@@ -302,42 +277,20 @@ public class IntentTest extends AppCompatActivity {
         }
     }
 
-    private void getLoc(JSONObject jsonObj) {
-        address = null;
-        zipcode = null;
-        try {
-            String status = jsonObj.getString("status");
-            if(status.equalsIgnoreCase("OK")){
-                JSONArray results = jsonObj.getJSONArray("results");
-                for(int i = 0; i < results.length(); i++) {
-                    JSONObject r = results.getJSONObject(i);
-                    JSONArray typesArray = r.getJSONArray("types");
-                    String types = typesArray.getString(0);
-                    if(types.equalsIgnoreCase("premise")) {
-                        address = r.getString("formatted_address").split(", ")[0];
-                        Log.i("Address", address);
-                    } else if(types.equalsIgnoreCase("postal_code")) {
-                        zipcode = r.getJSONArray("address_components").
-                                getJSONObject(0).getString("long_name");
-                        Log.i("Zipcode", zipcode);
-                    }
-                }
-            }
-        } catch (JSONException e) {
-            Log.e("Error", "Failed to load JSON");
-            e.printStackTrace();
-        }
-    }
-
     private void displayAddressOutput() {
-        if(address == null || zipcode == null) {
+        if(address == null) {
             showSnackbar("Invalid location.");
         } else {
             addEditCtrl.setText(address);
+        }
+        if(zipcode == null) {
+            showSnackbar("Invalid location.");
+        } else {
             zipEditCtrl.setText(zipcode);
         }
         mAddressRequested = false;
         updateUIWidgets();
+        stopService(new Intent(this, FetchAddressIntentService.class));
     }
 
     private void updateUIWidgets() {
@@ -348,5 +301,36 @@ public class IntentTest extends AppCompatActivity {
             mProgressBar.setVisibility(ProgressBar.GONE);
             locBtnCtlr.setEnabled(true);
         }
+    }
+
+    private void showToast(String text) {
+        Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+    }
+
+    private class AddressResultReceiver extends ResultReceiver {
+        AddressResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            if (resultCode == Constants.SUCCESS_RESULT) {
+                showToast(getString(R.string.address_found));
+                address = resultData.getString(Constants.RESULT_ADDRESS);
+                zipcode = resultData.getString(Constants.RESULT_ZIPCODE);
+                Log.i("Address", address);
+                Log.i("Zipcode", zipcode);
+                displayAddressOutput();
+            } else {
+                showToast("Address not found");
+            }
+            mAddressRequested = false;
+            updateUIWidgets();
+        }
+    }
+
+    public void onDestroy() {
+        stopService(new Intent(this, LocationMonitoringService.class));
+        super.onDestroy();
     }
 }
