@@ -39,8 +39,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //CheckUserSex();
-        zipcode = "02446";
+        zipcode = "02163";
         getUserCard();
+        getOpendata();
 
 
 
@@ -198,6 +199,38 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+    public void getOpendata(){
+        final DatabaseReference OpenDataDb = FirebaseDatabase.getInstance().getReference().child("opendata");
+        OpenDataDb.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                if(dataSnapshot.exists()){
+                    al.add(String.valueOf(dataSnapshot.child(zipcode).child("description").getValue()));
+                    arrayAdapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     public void logoutUser(View view) {
