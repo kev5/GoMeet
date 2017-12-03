@@ -8,7 +8,7 @@ Trello link: https://trello.com/b/PedpOsv9/ec601opendata
 
 ## Use of Open Data in this Project
 
-* All the open data used in this project will be from 
+* All the open data used in this project is from the official [Boston City Government Website](https://data.boston.gov).
 
 
 ## Team Members
