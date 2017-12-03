@@ -6,18 +6,22 @@
 
 Trello link: https://trello.com/b/PedpOsv9/ec601opendata
 
+## Team Members
+
+* [Keval Khara](https://github.com/kev5)
+* [Fei Chen](https://github.com/nantongchenfei)
+* [Zulin Liu](https://github.com/liuzulin)
+* [Sihan Wang](https://github.com/shwang95)
+
 ## Use of Open Data in this Project
 
 * All the open data used in this project is from the official [Boston City Government Website](https://data.boston.gov). The following data sets are stored in the database-
  - [Boston Crime Data Since 2015](https://data.boston.gov/dataset/crime-incident-reports-august-2015-to-date-source-new-system)
  - [Boston Neighborhood](https://data.boston.gov/dataset/boston-neighborhoods)
  - [Boston Free WiFi Locations](https://data.boston.gov/dataset/wicked-free-wi-fi-locations)
+ 
+## How we Built the App
 
-## Team Members
-
-* Keval Khara
-* Fei Chen
-* Zulin Liu
-* Sihan Wang
-
-
+* The app was developed on Android Studio.
+* Firebase was used for user authentication and verification.
+* Firebase's NoSQL Database was used as the database for this app. We used a NoSQL Database because we wanted a high-perfomance non-relational database which could handle a large amount of data in real-time.
