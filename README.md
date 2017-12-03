@@ -11,8 +11,7 @@ Trello link: https://trello.com/b/PedpOsv9/ec601opendata
 * All the open data used in this project is from the official [Boston City Government Website](https://data.boston.gov). The following data sets are stored in the database-
  - [Boston Crime Data Since 2015](https://data.boston.gov/dataset/crime-incident-reports-august-2015-to-date-source-new-system)
  - [Boston Neighborhood](https://data.boston.gov/dataset/boston-neighborhoods)
- - []()
-
+ - [Boston Free WiFi Locations](https://data.boston.gov/dataset/wicked-free-wi-fi-locations)
 
 ## Team Members
 
