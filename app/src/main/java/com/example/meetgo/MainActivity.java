@@ -1,8 +1,23 @@
 package com.example.meetgo;
 
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.ResultReceiver;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,8 +27,11 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -26,12 +44,17 @@ import com.lorentzos.flingswipe.SwipeFlingAdapterView;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-
+    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
+    protected Location mLastLocation;
+    private AddressResultReceiver mResultReceiver;
     private ArrayList<String> al;
     private ArrayAdapter<String> arrayAdapter;
     private int i;
     private FirebaseAuth mAuth;
-    private String zipcode;
+    private ProgressBar mProgressBar;
+    Double lat, lng, lat_final, lng_final;
+    String zipcode = null;
 
 
     @Override
@@ -39,12 +62,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //CheckUserSex();
-        zipcode = "02163";
-        getUserCard();
-        getOpendata();
-
-
-
+        mLastLocation = new Location("");
+        mResultReceiver = new AddressResultReceiver(new Handler());
+        mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        mProgressBar.setVisibility(ProgressBar.VISIBLE);
         al = new ArrayList<>();
         arrayAdapter = new ArrayAdapter<>(this, R.layout.item, R.id.helloText, al );
         //getUserCard();
@@ -95,9 +116,30 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClicked(int itemPosition, Object dataObject) {
                 Toast.makeText(MainActivity.this, "Click!", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this,IntentTest.class);
+                startActivity(intent);
+                finish();
+                return;
             }
         });
 
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        lat = Double.parseDouble(intent.getStringExtra(LocationMonitoringService.EXTRA_LATITUDE));
+                        lng = Double.parseDouble(intent.getStringExtra(LocationMonitoringService.EXTRA_LONGITUDE));
+                        mLastLocation.setLatitude(lat);
+                        mLastLocation.setLongitude(lng);
+                        startIntentService();
+                        if (zipcode != null) {
+                            mProgressBar.setVisibility(ProgressBar.GONE);
+                            getUserCard();
+                            getOpendata();
+                        }
+                    }
+                }, new IntentFilter(LocationMonitoringService.ACTION_LOCATION_BROADCAST)
+        );
     }
 //    private String userSex;
 //    private String notUserSex;
@@ -245,7 +287,156 @@ public class MainActivity extends AppCompatActivity {
     public void postEvent(View view){
         Intent intent = new Intent(MainActivity.this,PostActivity.class);
         startActivity(intent);
-        finish();
-        return;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (checkGooglePlayServices()) {
+            checkInternet();
+        } else {
+            showToast("No google play service");
+        }
+    }
+
+    private void startIntentService() {
+        Intent intent = new Intent(this, FetchAddressIntentService.class);
+        intent.putExtra(Constants.RECEIVER, mResultReceiver);
+        intent.putExtra(Constants.LOCATION_DATA_EXTRA, mLastLocation);
+        startService(intent);
+    }
+
+    private void showSnackbar(final int mainTextStringId, final int actionStringId,
+                              View.OnClickListener listener) {
+        Snackbar.make(findViewById(android.R.id.content),
+                getString(mainTextStringId),
+                Snackbar.LENGTH_INDEFINITE)
+                .setAction(getString(actionStringId), listener).show();
+    }
+
+    private void showSnackbar(final String text) {
+        View container = findViewById(R.id.main_activity_container);
+        if (container != null) {
+            Snackbar.make(container, text, Snackbar.LENGTH_LONG).show();
+        }
+    }
+
+    private void showToast(String text) {
+        Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+    }
+
+    public boolean checkGooglePlayServices() {
+        GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
+        int status = googleApiAvailability.isGooglePlayServicesAvailable(this);
+        if (status != ConnectionResult.SUCCESS) {
+            if (googleApiAvailability.isUserResolvableError(status)) {
+                googleApiAvailability.getErrorDialog(this, status, 2404).show();
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private void checkInternet() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+
+        if (activeNetworkInfo == null || !activeNetworkInfo.isConnected()) {
+            showToast("No internet connection");
+            return;
+        }
+
+        if (checkPermissions()) {
+            Intent intent = new Intent(this, LocationMonitoringService.class);
+            startService(intent);
+        } else {
+            requestPermissions();
+        }
+    }
+
+    private boolean checkPermissions() {
+        int permissionState = ActivityCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION);
+        return permissionState == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void startLocationPermissionRequest() {
+        ActivityCompat.requestPermissions(MainActivity.this,
+                new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION},
+                REQUEST_PERMISSIONS_REQUEST_CODE);
+    }
+
+    private void requestPermissions() {
+        boolean shouldProvideRationale =
+                ActivityCompat.shouldShowRequestPermissionRationale(this,
+                        android.Manifest.permission.ACCESS_COARSE_LOCATION);
+
+        if (shouldProvideRationale) {
+            Log.i(TAG, "Displaying permission rationale to provide additional context.");
+
+            showSnackbar(R.string.permission_rationale, android.R.string.ok,
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            startLocationPermissionRequest();
+                        }
+                    });
+
+        } else {
+            Log.i(TAG, "Requesting permission");
+            startLocationPermissionRequest();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        Log.i(TAG, "onRequestPermissionResult");
+        if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
+            if (grantResults.length <= 0) {
+                Log.i(TAG, "User interaction was cancelled.");
+            } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Intent intent = new Intent(this, LocationMonitoringService.class);
+                startService(intent);
+            } else {
+                showSnackbar(R.string.permission_denied_explanation, R.string.settings,
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                Intent intent = new Intent();
+                                intent.setAction(
+                                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                Uri uri = Uri.fromParts("package",
+                                        BuildConfig.APPLICATION_ID, null);
+                                intent.setData(uri);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                            }
+                        });
+            }
+        }
+    }
+
+    private class AddressResultReceiver extends ResultReceiver {
+        AddressResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            if (resultCode == Constants.SUCCESS_RESULT) {
+                // showToast(getString(R.string.address_found));
+                zipcode = resultData.getString(Constants.RESULT_ZIPCODE);
+                Log.i("Zipcode", zipcode);
+            } else {
+                showToast("Address not found");
+            }
+        }
+    }
+
+    public void onDestroy() {
+        stopService(new Intent(this, LocationMonitoringService.class));
+        super.onDestroy();
     }
 }
