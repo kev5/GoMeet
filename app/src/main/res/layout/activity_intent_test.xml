@@ -16,7 +16,7 @@
             android:id="@+id/textView1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Enter Name"
+            android:text="Event Name"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <EditText
@@ -29,7 +29,7 @@
             android:id="@+id/textView2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Enter Description"
+            android:text="Event Description"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <EditText
@@ -54,7 +54,7 @@
             android:id="@+id/textView3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Enter Time"
+            android:text="Time"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <EditText

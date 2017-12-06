@@ -38,6 +38,7 @@ import com.seatgeek.placesautocomplete.model.PlaceDetails;
 
 public class PostActivity extends AppCompatActivity {
     private EditText mEventName;
+    private EditText mEventDescription;
     private Button mPostEvent, mGetLocation;
     private FirebaseAuth mAuth;
     private PlacesAutocompleteTextView mAddress;
@@ -63,6 +64,10 @@ public class PostActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
         //CheckUserSex();
+        mAuth = FirebaseAuth.getInstance();
+        mEventName = (EditText) findViewById(R.id.event_name);
+        mEventDescription = (EditText) findViewById(R.id.event_descr);
+
         mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
         mGetLocation = (Button) findViewById(R.id.get_loc);
         mGetLocation.setOnClickListener(new LocationButtonHandler());
@@ -70,8 +75,6 @@ public class PostActivity extends AppCompatActivity {
         updateUIWidgets();
         mLastLocation = new Location("");
         mResultReceiver = new AddressResultReceiver(new Handler());
-        mAuth = FirebaseAuth.getInstance();
-        mEventName = (EditText) findViewById(R.id.event_name);
         mAddress = (PlacesAutocompleteTextView) findViewById(R.id.venue);
         mAddress.setOnPlaceSelectedListener(new OnPlaceSelectedListener() {
             @Override
@@ -116,6 +119,7 @@ public class PostActivity extends AppCompatActivity {
                         lat_final = details.geometry.location.lat;
                         lng_final = details.geometry.location.lng;
                         Log.i("Lat, lng", String.format("%f, %f", lat_final, lng_final));
+                        Log.i("Zipcode", zipcode);
                         // displayAddressOutput();
                     }
 
@@ -142,9 +146,16 @@ public class PostActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 final String eventName = mEventName.getText().toString();
+                final String eventDes = mEventDescription.getText().toString();
                 final String userId = mAuth.getCurrentUser().getUid();
-                DatabaseReference postDb = FirebaseDatabase.getInstance().getReference().child("posts").child(userId).child("postText");
-                postDb.setValue(eventName);
+                DatabaseReference postNameDb = FirebaseDatabase.getInstance().getReference().child("posts").child("zipcode").child(zipcode).child(userId).child("postName");
+                postNameDb.setValue(eventName);
+                DatabaseReference postDb = FirebaseDatabase.getInstance().getReference().child("posts").child("zipcode").child(zipcode).child(userId).child("postText");
+                postDb.setValue(eventDes);
+                DatabaseReference latDb = FirebaseDatabase.getInstance().getReference().child("posts").child("zipcode").child(zipcode).child(userId).child("Lat");
+                latDb.setValue(lat_final);
+                DatabaseReference lngDb = FirebaseDatabase.getInstance().getReference().child("posts").child("zipcode").child(zipcode).child(userId).child("Lng");
+                lngDb.setValue(lng_final);
                 Intent intent = new Intent(PostActivity.this,MainActivity.class);
                 startActivity(intent);
                 finish();
@@ -265,61 +276,11 @@ public class PostActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case android.R.id.home:
                 stopService(new Intent(this, LocationMonitoringService.class));
+                Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
                 this.finish(); // Back button
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
-
-//    private String userSex;
-//    private String notUserSex;
-//    public void CheckUserSex(){
-//        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-//        DatabaseReference maleDb = FirebaseDatabase.getInstance().getReference().child("Users").child("Male");
-//        maleDb.addChildEventListener(new ChildEventListener() {
-//            @Override
-//            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-//                if(dataSnapshot.getKey().equals(user.getUid())){
-//                    userSex = "Male";
-//                    notUserSex = "Female";
-//
-//                }
-//            }
-//            @Override
-//            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-//            }
-//            @Override
-//            public void onChildRemoved(DataSnapshot dataSnapshot) {
-//            }
-//            @Override
-//            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-//            }
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//            }
-//        });
-//        DatabaseReference femaleDb = FirebaseDatabase.getInstance().getReference().child("Users").child("Female");
-//        femaleDb.addChildEventListener(new ChildEventListener() {
-//            @Override
-//            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-//                if(dataSnapshot.getKey().equals(user.getUid())){
-//                    userSex = "Female";
-//                    notUserSex = "Male";
-//
-//                }
-//            }
-//            @Override
-//            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-//            }
-//            @Override
-//            public void onChildRemoved(DataSnapshot dataSnapshot) {
-//            }
-//            @Override
-//            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-//            }
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//            }
-//        });
-//    }
 }

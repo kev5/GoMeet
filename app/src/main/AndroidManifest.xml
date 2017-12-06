@@ -22,18 +22,17 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
-        <activity android:name=".MainActivity" />
-        <activity android:name=".ChooseLoginRegistrationActivity">
+        <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".RegistrationActivity" />
-        <activity android:name=".LoginActivity" />
+        <activity android:name=".RegisterActivity" />
+        <activity android:name=".MainActivity" />
         <activity android:name=".PostActivity" />
-        <activity android:name=".IntentTest"></activity>
+        <activity android:name=".IntentTest" />
 
         <activity
             android:name=".MapsMarkerActivity"

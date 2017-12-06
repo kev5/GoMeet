@@ -49,13 +49,17 @@ public class MapsMarkerActivity extends AppCompatActivity
         }
         // Get intent
         Intent intename = getIntent();
-        nameString = (String) intename.getSerializableExtra("NAME");
-        timeString = (String) intename.getSerializableExtra("TIME");
-        descriptionString = (String) intename.getSerializableExtra("DES");
+//        nameString = (String) intename.getSerializableExtra("NAME");
+//        timeString = (String) intename.getSerializableExtra("TIME");
+        nameString = "lalala";
+        timeString = "24:00";
+        descriptionString = (String) intename.getSerializableExtra("PostText");
         lat = (double) intename.getSerializableExtra("LAT");
         lng = (double) intename.getSerializableExtra("LNG");
-        zipcodeString = (String) intename.getSerializableExtra("ZIPCODE");
-        addressString = (String) intename.getSerializableExtra("ADDRESS");
+//        zipcodeString = (String) intename.getSerializableExtra("ZIPCODE");
+//        addressString = (String) intename.getSerializableExtra("ADDRESS");
+        zipcodeString = "02215";
+        addressString = "PHO";
         location = new LatLng(lat, lng);
         // Get the SupportMapFragment and request notification
         // when the map is ready to be used.
