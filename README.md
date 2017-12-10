@@ -29,3 +29,15 @@ All the open data used in this project is from the official [Boston City Governm
 ## Project Overview
 
 ![](https://github.com/kev5/Go-Meet/blob/master/Project%20Overview.PNG)
+
+## What We Learned
+
+* Defining User Stories 
+* Using GitHub to collaborately develop the application
+* Using Trello for Project Management
+* Using Slack for communication
+* Agile Software Development Methodologies
+
+## Challenges Faced
+
+* Extensively using Android Studio and Google's Firebase caused some integration issues
