@@ -25,3 +25,7 @@ All the open data used in this project is from the official [Boston City Governm
 * The app was developed on Android Studio.
 * Firebase was used for user authentication and verification.
 * Firebase's NoSQL Database was used as the database for this app. We used a NoSQL Database because we wanted a high-perfomance non-relational database which could handle a large amount of data in real-time.
+
+## Project Overview
+
+![](https://github.com/kev5/Go-Meet/blob/master/Project%20Overview.PNG)
