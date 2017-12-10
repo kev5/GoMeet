@@ -43,3 +43,9 @@ All the open data used in this project is from the official [Boston City Governm
 * Extensively using Android Studio and Google's Firebase caused some integration issues
 * Having to learn Firebase and Android Studio in detail caused a slow start
 
+## What's Next for GO&MEET
+
+* We have already developed a beta version for the iOS version of our application.
+* Adding a filter for different type events and open data
+* Ability to pay through the app for paid events
+* Adding more animations to the UI
