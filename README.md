@@ -41,3 +41,5 @@ All the open data used in this project is from the official [Boston City Governm
 ## Challenges Faced
 
 * Extensively using Android Studio and Google's Firebase caused some integration issues
+* Having to learn Firebase and Android Studio in detail caused a slow start
+
