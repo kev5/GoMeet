@@ -52,5 +52,5 @@ All the open data used in this project is from the official [Boston City Governm
 
 ## Our Poster
 
-[](https://github.com/kev5/Go-Meet/blob/master/GoMeetPoster.pdf)
+![](https://github.com/kev5/Go-Meet/blob/master/GoMeetPoster.PNG)
 
