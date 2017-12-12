@@ -13,3 +13,5 @@ Our Application was tested for compatibility on the following devices-
 The results were as follows-
 
 ![](https://github.com/kev5/Go-Meet/blob/master/Testing/DeviceTests.PNG)
+
+The Built-in Explorer Suite in *Amazon Kindle Fire* and *LG G Pad* suffered a failure during the registration. We think it was because of failure to access the database properly, since all other devices successfully passed this test.
