@@ -49,3 +49,8 @@ All the open data used in this project is from the official [Boston City Governm
 * Adding a filter for different type events and open data
 * Ability to pay through the app for paid events
 * Adding more animations to the UI
+
+## Our Poster
+
+![](https://github.com/kev5/Go-Meet/blob/master/GoMeetPoster.pdf)
+
