@@ -30,6 +30,10 @@ All the open data used in this project is from the official [Boston City Governm
 
 ![](https://github.com/kev5/Go-Meet/blob/master/Project%20Overview.PNG)
 
+## Automated Testing on AWS
+
+Check out the [Testing](https://github.com/kev5/Go-Meet/tree/master/Testing) directory in the repository for more information.
+
 ## What We Learned
 
 * Defining User Stories 
