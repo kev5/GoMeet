@@ -2,7 +2,7 @@
 
 Our Application was tested for compatibility on the following devices-
 
-[](https://github.com/kev5/Go-Meet/blob/master/Testing/AWS_Test.PNG)
+![](https://github.com/kev5/Go-Meet/blob/master/Testing/AWS_Test.PNG)
 
 3 tests were performed on each of the devices-
 
@@ -12,4 +12,4 @@ Our Application was tested for compatibility on the following devices-
 
 The results were as follows-
 
-[](https://github.com/kev5/Go-Meet/blob/master/Testing/DeviceTests.PNG)
+![](https://github.com/kev5/Go-Meet/blob/master/Testing/DeviceTests.PNG)
