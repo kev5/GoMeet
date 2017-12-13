@@ -14,4 +14,4 @@ The results were as follows-
 
 ![](https://github.com/kev5/Go-Meet/blob/master/Testing/DeviceTests.PNG)
 
-The Built-in Explorer Suite in *Amazon Kindle Fire* and *LG G Pad* suffered a failure during the registration. We think it was because of failure to access the database properly, since all other devices successfully passed this test.
+The Built-in Explorer Suite in *Amazon Kindle Fire* and *LG G Pad* suffered a failure during the registration. We think it was because of failure to access the database properly owing to the fact that the API key of Google Maps API has to be regenerated after a certain number of uses as it is limited.
